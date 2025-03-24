@@ -1,0 +1,26 @@
+version: "3.8" 
+services:       
+  audio_to_text_backend:
+    container_name: audio_to_text_backend
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      - SQLITE_DB_PATH=/data/transcriptions.db
+      - UPLOAD_DIR=/data/uploads
+      - PYTHONUNBUFFERED=1
+      - ALLOWED_ORIGINS=http://audio_to_text_frontend:80
+
+  audio_to_text_frontend:
+    container_name: audio_to_text_frontend
+    build: 
+      context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:8000"  # Pass the backend API URL to the build
+    ports:
+      - "5173:80"
+    depends_on:
+      - audio_to_text_backend  # Ensure backend starts before frontend
